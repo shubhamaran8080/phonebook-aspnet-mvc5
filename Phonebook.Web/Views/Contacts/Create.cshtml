@@ -1,0 +1,52 @@
+﻿@model Phonebook.Web.Models.ViewModels.ContactFormViewModel
+@{
+    ViewBag.Title = "Add Contact";
+    ViewBag.PageTitle = "Add Contact";
+}
+
+<div class="page">
+    <header class="page-header">
+        <div>
+            @Html.ActionLink("← Back to contacts", "Index", "Contacts", null, new { @class = "link", style = "font-weight: 500" })
+            <h1 style="margin-top: 8px">Add Contact</h1>
+            <p class="subtitle">Create a new phonebook entry</p>
+        </div>
+    </header>
+
+    <div class="card form-card">
+        @using (Html.BeginForm("Create", "Contacts", FormMethod.Post, new { @class = "form-grid", novalidate = "novalidate" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="field">
+                <span>Name *</span>
+                @Html.TextBoxFor(m => m.Name, new { @class = "input", placeholder = "Jane Doe", maxlength = "255" })
+                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "field-error" })
+            </div>
+
+            <div class="field">
+                <span>Phone number * <span class="hint">(E.164 format, e.g. +1234567890)</span></span>
+                @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "input", placeholder = "+1234567890", title = "Phone number in E.164 format, e.g. +1234567890" })
+                @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "field-error" })
+            </div>
+
+            <div class="field">
+                <span>Email <span class="hint">(optional)</span></span>
+                @Html.TextBoxFor(m => m.Email, new { @class = "input", type = "email", placeholder = "jane@example.com" })
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "field-error" })
+            </div>
+
+            <div class="field">
+                <span>Address <span class="hint">(optional)</span></span>
+                @Html.TextAreaFor(m => m.Address, new { @class = "input", placeholder = "123 Main St, City" })
+                @Html.ValidationMessageFor(m => m.Address, "", new { @class = "field-error" })
+            </div>
+
+            <div style="display: flex; gap: 10px">
+                <button type="submit" class="btn btn-primary">Add Contact</button>
+                @Html.ActionLink("Cancel", "Index", "Contacts", null, new { @class = "btn" })
+            </div>
+        }
+    </div>
+</div>

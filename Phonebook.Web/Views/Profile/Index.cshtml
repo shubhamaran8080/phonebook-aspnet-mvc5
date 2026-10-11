@@ -1,0 +1,48 @@
+﻿@model Phonebook.Web.Models.ViewModels.ProfileViewModel
+@{
+    ViewBag.Title = "Account";
+    ViewBag.PageTitle = "Account";
+}
+
+<div class="page">
+    <header class="page-header">
+        <div>
+            <h1>Account</h1>
+            <p class="subtitle">Your profile and session details</p>
+        </div>
+    </header>
+
+    <div class="card">
+        <div class="profile-header">
+            <span class="avatar large">@(Model.Username.Length > 0 ? Model.Username.Substring(0, 1).ToUpper() : "?")</span>
+            <div>
+                <h2>@Model.Username</h2>
+                <p class="subtitle">@(Model.Email ?? "No email address")</p>
+            </div>
+        </div>
+        <div class="profile-field">
+            <span class="k">Username</span>
+            <span class="v">@Model.Username</span>
+        </div>
+        <div class="profile-field">
+            <span class="k">Email</span>
+            <span class="v">@(Model.Email ?? "—")</span>
+        </div>
+        <div class="profile-field">
+            <span class="k">Member since</span>
+            <span class="v">@Model.CreatedAt.ToString("MMMM d, yyyy")</span>
+        </div>
+        <div class="card-body" style="border-top: 1px solid var(--border)">
+            @using (Html.BeginForm("Logout", "Account", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>
+                    </svg>
+                    Log out
+                </button>
+            }
+        </div>
+    </div>
+</div>

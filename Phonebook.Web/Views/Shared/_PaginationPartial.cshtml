@@ -1,0 +1,37 @@
+﻿@model Phonebook.Web.Models.ViewModels.ContactListViewModel
+
+@{
+    var pageButtons = Phonebook.Web.Models.ViewModels.PaginationHelper.GetPageButtons(Model.Page, Model.TotalPages);
+}
+
+<div class="table-footer">
+    <span class="page-info">
+        Showing @Model.RangeStart&ndash;@Model.RangeEnd of @Model.TotalCount.ToString("N0")
+    </span>
+    <nav class="pagination" aria-label="Pagination, page @Model.Page of @Model.TotalPages">
+        <a href="@Url.Action("Index", new { page = Model.Page - 1, pageSize = Model.PageSize, q = Model.SearchQuery })"
+           class="btn btn-sm @(Model.Page <= 1 ? "disabled" : "")"
+           @(Model.Page <= 1 ? "aria-disabled=\"true\"" : "")
+           aria-label="Go to previous page">Previous</a>
+
+        @foreach (var item in pageButtons)
+        {
+            if (item is int pageNum)
+            {
+                <a href="@Url.Action("Index", new { page = pageNum, pageSize = Model.PageSize, q = Model.SearchQuery })"
+                   class="btn btn-sm page-btn @(pageNum == Model.Page ? "active" : "")"
+                   aria-label="Go to page @pageNum"
+                   @(pageNum == Model.Page ? "aria-current=\"page\"" : "")>@pageNum</a>
+            }
+            else
+            {
+                <span class="pagination-ellipsis" aria-hidden="true">@item</span>
+            }
+        }
+
+        <a href="@Url.Action("Index", new { page = Model.Page + 1, pageSize = Model.PageSize, q = Model.SearchQuery })"
+           class="btn btn-sm @(Model.Page >= Model.TotalPages ? "disabled" : "")"
+           @(Model.Page >= Model.TotalPages ? "aria-disabled=\"true\"" : "")
+           aria-label="Go to next page">Next</a>
+    </nav>
+</div>

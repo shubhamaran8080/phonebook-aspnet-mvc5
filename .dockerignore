@@ -1,0 +1,29 @@
+# Docker build context exclusions for Phonebook.Web
+# (keeps the context small and prevents local secrets / artifacts leaking in)
+
+# Source control and IDE
+.git
+.gitignore
+.vs
+**/.vs
+*.user
+*.suo
+
+# Build output - rebuilt inside the image
+**/bin/
+**/obj/
+**/_PublishedWebsites/
+**/TestResults/
+
+# Restored NuGet packages - "nuget restore" runs in the build stage
+packages/
+*.nupkg
+
+# Local secrets / machine-specific environment (never sent to the daemon)
+.env
+*.local
+
+# Logs and OS noise
+*.log
+Thumbs.db
+Desktop.ini

@@ -1,0 +1,60 @@
+﻿@model Phonebook.Web.Models.ViewModels.LoginViewModel
+@{
+    ViewBag.Title = "Sign in";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Phonebook</title>
+    @Styles.Render("~/Content/css")
+</head>
+<body>
+    <div class="login-page">
+        <div class="login-card">
+            <div class="login-brand">
+                <div class="login-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    </svg>
+                </div>
+                <h1>Phonebook</h1>
+                <p>Sign in to your account</p>
+            </div>
+
+            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "login-form", novalidate = "novalidate" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="field">
+                    <span>Email or Username</span>
+                    @Html.TextBoxFor(m => m.Username, new { @class = "input", placeholder = "you@example.com", autocomplete = "username" })
+                    @Html.ValidationMessageFor(m => m.Username, "", new { @class = "field-error" })
+                </div>
+
+                <div class="field">
+                    <span>Password</span>
+                    @Html.PasswordFor(m => m.Password, new { @class = "input", placeholder = "Enter your password", autocomplete = "current-password" })
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "field-error" })
+                </div>
+
+                <div class="field">
+                    <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer;">
+                        @Html.CheckBoxFor(m => m.RememberMe)
+                        <span>Remember me</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+            }
+        </div>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+</body>
+</html>

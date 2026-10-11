@@ -1,0 +1,178 @@
+﻿@model Phonebook.Web.Models.ViewModels.ContactListViewModel
+@{
+    ViewBag.Title = "Contacts";
+    ViewBag.PageTitle = "Contacts";
+}
+
+<div class="page">
+    <header class="page-header">
+        <div>
+            <h1>Contacts</h1>
+            <p class="subtitle">@Model.TotalCount.ToString("N0") contact@(Model.TotalCount == 1 ? "" : "s")</p>
+        </div>
+        <div class="page-actions">
+            @using (Html.BeginForm("Import", "Contacts", FormMethod.Post, new { enctype = "multipart/form-data", id = "importForm", style = "display: inline;" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="file" name="file" id="fileInput" accept=".csv,text/csv" class="file-input" aria-label="Choose a CSV file to import" />
+                <button type="button" class="btn" id="importBtn" aria-label="Import contacts from a CSV file">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+                    Import CSV
+                </button>
+            }
+            @Html.ActionLink("Export CSV", "Export", "Contacts", new { q = Model.SearchQuery }, new { @class = "btn" })
+            @Html.ActionLink("Add Contact", "Create", "Contacts", null, new { @class = "btn btn-primary" })
+        </div>
+    </header>
+
+    <div class="card">
+        <div class="toolbar">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+                </svg>
+                @Html.TextBox("search", Model.SearchQuery, new { @class = "input", placeholder = "Search by name or phone number...", aria_label = "Search contacts", id = "searchInput" })
+            </div>
+            @Html.DropDownList("pageSize", new SelectList(new[] { 10, 25, 50 }, Model.PageSize), new { @class = "input", style = "width: auto", aria_label = "Rows per page", id = "pageSizeSelect" })
+            <a href="#" class="link" id="downloadTemplate">CSV template</a>
+        </div>
+
+        @if (Model.Contacts.Count > 0)
+        {
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Address</th>
+                            <th style="text-align: right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var contact in Model.Contacts)
+                        {
+                            <tr>
+                                <td data-label="Name">
+                                    <div class="contact-cell">
+                                        <span class="avatar">@(contact.Name.Length > 0 ? contact.Name.Substring(0, 1).ToUpper() : "?")</span>
+                                        <span class="cell-main">
+                                            @Html.ActionLink(contact.Name, "Details", "Contacts", new { id = contact.Id }, null)
+                                        </span>
+                                    </div>
+                                </td>
+                                <td data-label="Phone" class="cell-sub">@contact.PhoneNumber</td>
+                                <td data-label="Email" class="cell-sub">@(contact.Email ?? "—")</td>
+                                <td data-label="Address" class="cell-sub">@(contact.Address ?? "—")</td>
+                                <td data-label="Actions" class="cell-actions">
+                                    @Html.ActionLink("Edit", "Edit", "Contacts", new { id = contact.Id }, new { @class = "btn btn-sm" })
+                                    @using (Html.BeginForm("Delete", "Contacts", new { id = contact.Id }, FormMethod.Post, new { style = "display: inline;", onsubmit = "return confirm('Delete contact \"" + contact.Name + "\"?');" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                {
+                    <h3>No results for "@Model.SearchQuery"</h3>
+                    <p>Try a different name or phone number.</p>
+                    <button class="btn" onclick="clearSearch()">Clear search</button>
+                }
+                else
+                {
+                    <h3>No contacts yet</h3>
+                    <p>Add your first contact to get started.</p>
+                    @Html.ActionLink("Add Contact", "Create", "Contacts", null, new { @class = "btn btn-primary" })
+                }
+            </div>
+        }
+
+        @if (Model.TotalCount > 0)
+        {
+            @Html.Partial("_PaginationPartial", Model)
+        }
+    </div>
+
+    <!-- Seed panel (development only) -->
+    <div class="card" style="margin-top: 20px;">
+        <div class="card-header">
+            <h2>Development: Seed Data</h2>
+        </div>
+        <div class="card-body">
+            <p style="margin-bottom: 12px; color: var(--text-secondary);">Generate synthetic contacts for testing. This is a development-only feature.</p>
+            @using (Html.BeginForm("Seed", "Contacts", FormMethod.Post, new { style = "display: flex; gap: 10px; align-items: center;" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="number" name="count" value="1000" min="1" max="10000" class="input" style="width: 120px;" />
+                <button type="submit" class="btn">Generate contacts</button>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        window.location.href = '@Url.Action("Index")';
+    }
+
+    // Search with debounce
+    var searchTimer;
+    document.getElementById('searchInput').addEventListener('input', function () {
+        clearTimeout(searchTimer);
+        var value = this.value;
+        searchTimer = setTimeout(function () {
+            var url = '@Url.Action("Index")?q=' + encodeURIComponent(value) + '&pageSize=' + @Model.PageSize;
+            window.location.href = url;
+        }, 250);
+    });
+
+    // Page size change
+    document.getElementById('pageSizeSelect').addEventListener('change', function () {
+        var url = '@Url.Action("Index")?q=' + encodeURIComponent('@Model.SearchQuery') + '&pageSize=' + this.value;
+        window.location.href = url;
+    });
+
+    // Import button
+    document.getElementById('importBtn').addEventListener('click', function () {
+        document.getElementById('fileInput').click();
+    });
+    document.getElementById('fileInput').addEventListener('change', function () {
+        if (this.files.length > 0) {
+            document.getElementById('importForm').submit();
+        }
+    });
+
+    // Download CSV template
+    document.getElementById('downloadTemplate').addEventListener('click', function (e) {
+        e.preventDefault();
+        var rows = [
+            ['name', 'phone_number', 'email', 'address'],
+            ['Rahul Sharma', '+919876543210', 'rahul@example.com', 'Pune'],
+            ['Amit Patil', '+919876543211', 'amit@example.com', 'Mumbai']
+        ];
+        var csv = rows.map(function (row) {
+            return row.map(function (cell) { return '"' + String(cell).replace(/"/g, '""') + '"'; }).join(',');
+        }).join('\n');
+        var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.href = url;
+        link.download = 'contacts-template.csv';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+    });
+</script>

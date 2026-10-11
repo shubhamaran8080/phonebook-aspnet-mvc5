@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------------------
+# Docker Compose for the Phonebook ASP.NET MVC 5 application
+# (.NET Framework 4.7.2 on IIS).
+#
+# *** WINDOWS CONTAINERS ARE REQUIRED ***
+# Docker Desktop must be switched to "Windows containers", or this must run on
+# a Windows Server host. A Linux container cannot run this application.
+# See README-Docker.md.
+#
+# SQL Server is intentionally NOT declared as a service here. This project must
+# keep using its existing database instead of a fresh, empty container database.
+# Point DEFAULT_CONNECTION_STRING (in .env) at the existing SQL Server and see
+# the "SQL Server" section of README-Docker.md.
+#
+# Usage:
+#   copy .env.example .env      # then edit .env with your real, local values
+#   docker compose up --build -d
+# ---------------------------------------------------------------------------
+services:
+  phonebook-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: phonebook-web:latest
+    container_name: phonebook-web
+    # "process" is fastest and requires the container OS to match the host OS.
+    # Use "hyperv" on Windows 10/11 Pro/Enterprise when the OS builds differ.
+    isolation: ${DOCKER_ISOLATION:-process}
+    env_file:
+      - .env
+    ports:
+      - "8080:80"
+    restart: unless-stopped
